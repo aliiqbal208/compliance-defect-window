@@ -155,22 +155,6 @@ app runs the local backend so the whole flow still works offline.
 - The governing side setback is the smallest of the labelled sides
 - Lot coverage is building footprint area divided by lot area
 
-## Limitations
-
-- The local backend reads the text layer only and does not reconcile it with the
-  drawn geometry, so a mislabelled drawing passes through unchecked
-- Vision bounding boxes are approximate, so annotation marks the region, not an
-  exact survey point
-- Scanned PDFs with no text layer are out of scope for this prototype
-- The rule set is a fixed sample, not a real bylaw
-
-## Future Improvements
-
-- OCR (Tesseract) for scanned, image-only plans
-- A local open vision model for offline runs at vision-grade accuracy
-- Geometry-based measurement that reconciles labels against drawn distances
-- Multi-page plans and imperial-unit support
-- Jurisdiction-specific rule sets loaded at runtime
 
 ## Build Status
 
