@@ -1,7 +1,7 @@
 """Extractor interface and backend selection.
 
 The pipeline depends only on this interface, so the perception layer is fully
-swappable: Claude vision when available, a fully offline local backend
+swappable: OpenAI vision when available, a fully offline local backend
 otherwise. Selection and graceful fallback live here.
 """
 import logging
@@ -21,20 +21,19 @@ class Extractor(Protocol):
 
 
 def get_extractor(settings: Settings = None) -> Extractor:
-    """Pick a backend, falling back to local when Claude is unavailable."""
+    """Pick a backend, falling back to local when OpenAI is unavailable."""
     settings = settings or get_settings()
 
-    if settings.extractor == "claude":
-        if settings.has_claude_credential:
-            from .vision_extractor import VisionExtractor
-            return VisionExtractor(
-                model=settings.claude_model,
-                api_key=settings.anthropic_api_key,
-                auth_token=settings.anthropic_auth_token,
+    if settings.extractor == "openai":
+        if settings.has_openai_credential:
+            from .openai_extractor import OpenAIExtractor
+            return OpenAIExtractor(
+                model=settings.openai_model,
+                api_key=settings.openai_api_key,
             )
         logger.warning(
-            "EXTRACTOR=claude but no ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN "
-            "is set; falling back to the local extractor."
+            "EXTRACTOR=openai but no OPENAI_API_KEY is set; falling back to "
+            "the local extractor."
         )
 
     from .local_extractor import LocalExtractor

@@ -34,12 +34,12 @@ the hardest part — reading a drawing — stays swappable.
 
 Extraction sits behind one interface with two backends:
 
-- **Claude vision** (default) reads the rendered page, handles varied drawing
-  styles, and emits confidence and bounding boxes for annotation
+- **OpenAI vision** (default, `gpt-4o`) reads the rendered page, handles varied
+  drawing styles, and emits confidence and bounding boxes for annotation
 - **Local** (offline) reads the embedded text layer with PyMuPDF and pdfplumber,
   needs no API key, and runs fully air-gapped
 
-If `EXTRACTOR=claude` but no API key is present, the app falls back to the local
+If `EXTRACTOR=openai` but no API key is present, the app falls back to the local
 backend automatically. Both return the same data shape, so nothing downstream
 changes. See `docs/architecture.md` for the full diagram and `docs/tech-stack.md`
 for the stack choices and trade-offs.
@@ -48,7 +48,7 @@ for the stack choices and trade-offs.
 
 - **Backend** Python, FastAPI
 - **PDF** PyMuPDF for rendering and annotation, pdfplumber for the text layer
-- **Extraction** Claude vision via the Anthropic SDK, with a local fallback
+- **Extraction** OpenAI vision via the OpenAI SDK, with a local fallback
 - **Frontend** Next.js, React, TypeScript, Tailwind
 
 ## Setup
@@ -61,14 +61,19 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-cp .env.example .env          # add ANTHROPIC_API_KEY to use Claude vision
+cp .env.example .env          # add OPENAI_API_KEY to use OpenAI vision
 python sample_data/generate_sample.py   # writes a test site plan
 
 uvicorn app.main:app --reload   # serves on http://127.0.0.1:8000
 pytest                          # run the test suite
 ```
 
-Set `EXTRACTOR=local` in `.env` to run without any API key.
+Set `EXTRACTOR=local` in `.env` to run without any API key. To use OpenAI
+vision, set `EXTRACTOR=openai` and `OPENAI_API_KEY` (optionally `OPENAI_MODEL`,
+default `gpt-4o`).
+
+Without a key the app runs the local backend, so the whole flow still works
+offline.
 
 ### API
 
@@ -125,7 +130,7 @@ visible instead of hiding it.
   bylaw is broken, UNKNOWN means the value couldn't be extracted
 - Derived values inherit the lowest confidence of their inputs, so a computed
   number is never trusted more than the weakest reading behind it
-- The Claude backend cross-checks every reading against the PDF text layer:
+- The vision backend cross-checks every reading against the PDF text layer:
   agreement raises confidence, a conflict lowers it and raises a warning
 
 ## Project Structure
@@ -139,13 +144,15 @@ docs/      Architecture diagram, tech-stack rationale, and demo script
 ## Testing
 
 ```bash
-cd backend && pytest      # 12 tests: pipeline, annotation, API
+cd backend && pytest      # 15 tests: pipeline, annotation, API, OpenAI
 cd frontend && npm run build   # type-check + production build
 ```
 
-The local backend is covered end-to-end on the synthetic sample. The Claude
-backend is exercised by adding `ANTHROPIC_API_KEY` to `.env`; without a key the
-app runs the local backend so the whole flow still works offline.
+The local backend is covered end-to-end on the synthetic sample, and the OpenAI
+backend's field mapping and text cross-check are covered with the API call
+mocked. To exercise OpenAI live, add `OPENAI_API_KEY` to `.env` and set
+`EXTRACTOR=openai`; without a key the app runs the local backend so the whole
+flow still works offline.
 
 ## Assumptions
 
@@ -159,7 +166,7 @@ app runs the local backend so the whole flow still works offline.
 ## Build Status
 
 - [x] Phase 1 — Project scaffold and sample-data generator
-- [x] Phase 2 — Extraction layer (schema, rendering, Claude + local backends)
+- [x] Phase 2 — Extraction layer (schema, rendering, OpenAI + local backends)
 - [x] Phase 3 — Measurement and compliance engines (with tests)
 - [x] Phase 4 — PDF annotation (red/amber boxes, numbered markers, legend)
 - [x] Phase 5 — API (analyze, annotated/source PDF serving, health)

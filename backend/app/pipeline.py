@@ -1,8 +1,9 @@
 """End-to-end orchestration: extract -> measure -> evaluate.
 
 Kept separate from the web layer so it's testable on its own. Adds runtime
-resilience: if the Claude backend fails mid-request (network, rate limit), it
-falls back to the local backend and records why, instead of failing the request.
+resilience: if the vision backend (OpenAI) fails mid-request (network, rate
+limit), it falls back to the local backend and records why, instead of failing
+the request.
 """
 import logging
 from typing import Optional, Tuple
@@ -25,14 +26,15 @@ def analyze(pdf_path: str,
     try:
         plan = extractor.extract(pdf_path)
     except Exception as exc:  # noqa: BLE001 - resilience over a clean stack
-        if extractor.name != "claude":
+        if extractor.name == "local":
             raise
-        logger.warning("Claude extraction failed (%s); using local fallback",
-                       exc)
+        logger.warning("%s extraction failed (%s); using local fallback",
+                       extractor.name, exc)
         from .extraction.local_extractor import LocalExtractor
         plan = LocalExtractor().extract(pdf_path)
         plan.warnings.append(
-            f"Claude extraction failed ({exc}); fell back to local backend."
+            f"{extractor.name} extraction failed ({exc}); fell back to the "
+            f"local backend."
         )
 
     derive(plan)

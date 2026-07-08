@@ -61,6 +61,12 @@ def _is_pdf(path: Path) -> bool:
         return False
 
 
+@app.get("/health")
+def liveness() -> dict:
+    """Lightweight liveness probe for load balancers and container checks."""
+    return {"status": "ok"}
+
+
 @app.get("/api/health")
 def health() -> dict:
     settings = get_settings()
@@ -117,5 +123,8 @@ def _serve(job_id: str, name: str, download_name: str) -> FileResponse:
     path = _job_dir(job_id) / name
     if not path.exists():
         raise HTTPException(404, "Not found.")
+    # inline (not attachment) so the browser renders the PDF in the viewer
+    # iframe instead of downloading it.
     return FileResponse(path, media_type="application/pdf",
-                        filename=download_name)
+                        filename=download_name,
+                        content_disposition_type="inline")

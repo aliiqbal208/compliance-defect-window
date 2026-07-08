@@ -12,7 +12,7 @@ below is measured against those goals and the 72-hour scope.
 | Backend | Python, FastAPI | Strongest PDF and AI ecosystem; typed, low-boilerplate API |
 | PDF render and annotate | PyMuPDF | Rasterizes pages and draws overlays in one library |
 | Text extraction | pdfplumber | Exact text layer plus word bounding boxes |
-| Extraction model | Claude vision, with a local fallback | Generalizes across drawings; confidence and boxes for free |
+| Extraction model | OpenAI vision, with a local fallback | Generalizes across drawings; confidence and boxes for free |
 | Data modeling | Pydantic | One typed contract shared by the pipeline and the API |
 | Frontend | Next.js, React, TypeScript, Tailwind | Single-page UI, built-in API proxy, type parity with the backend |
 | PDF viewer | Native browser iframe | Renders the annotated PDF with zero extra dependencies |
@@ -28,7 +28,7 @@ Three principles drove the choices:
 
 ## Backend Language and Framework — Python and FastAPI
 
-Python wins on ecosystem: PyMuPDF, pdfplumber, and the Anthropic SDK all live
+Python wins on ecosystem: PyMuPDF, pdfplumber, and the OpenAI SDK all live
 here, so the entire pipeline stays in one language with no glue layer. FastAPI
 adds typed request and response models through Pydantic, async file uploads,
 and automatic validation with very little boilerplate.
@@ -51,14 +51,13 @@ Using both avoids stretching one tool past its strength. pdfminer alone is
 lower-level and slower, and it doesn't render or draw; PyMuPDF covers the pixel
 and drawing side that pdfminer can't.
 
-## Extraction — Claude Vision, with an Offline Fallback
+## Extraction — OpenAI Vision, with an Offline Fallback
 
 Extraction is the hard part, and it's where the architecture earns its keep.
 Site plans vary widely, so a vision model is the primary backend: it generalizes
 across drawing styles, emits a confidence score per value, says "unable to
 determine" instead of guessing, and returns bounding boxes that drive the
-annotation — all in a single call. The model is Claude Opus 4.8 through the
-Anthropic SDK.
+annotation — all in a single call. The model is GPT-4o through the OpenAI SDK.
 
 A rule-based computer-vision approach (line detection plus OCR) was considered
 and rejected for the MVP. It's brittle across real drawings and would consume

@@ -7,8 +7,6 @@ venv/
 .pytest_cache/
 
 # Environment
-.env
-.env.local
 
 # Storage / generated artifacts
 backend/storage/*
@@ -22,8 +20,8 @@ npm-debug.log*
 
 # OS / editor
 .DS_Store
-.vscode/
 .idea/
 
 assessment.md
 assessment.txt
+config.bat

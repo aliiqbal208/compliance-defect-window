@@ -8,7 +8,7 @@
               └──────┬───────┘
                      ▼
          ┌───────────────────────┐
-         │   Extraction Layer    │   Claude vision  OR  local (offline)
+         │   Extraction Layer    │   OpenAI vision  OR  local (offline)
          │  (swappable backend)  │   -> SitePlan { fields, confidence, bbox }
          └───────────┬───────────┘
                      ▼
@@ -45,7 +45,7 @@ exact.
 
 `Extractor` is a protocol with two backends behind it:
 
-- **Claude vision** reads the rendered page image. It generalizes across drawing
+- **OpenAI vision** reads the rendered page image. It generalizes across drawing
   styles, produces a confidence score per value, says "unable to determine"
   instead of guessing, and returns bounding boxes that drive annotation.
 - **Local** reads the embedded text layer with pdfplumber and locates values
@@ -57,9 +57,9 @@ worse result. The risk is a confident wrong reading, so the vision backend
 cross-checks every number against the text layer: agreement raises confidence, a
 clear conflict cuts it and surfaces a warning.
 
-The local backend exists so a client with no Claude access can still run the
-whole pipeline. The contract is identical, so the rest of the system never knows
-which backend ran. Confidence and "unable to determine" carry the difference in
+The local backend exists so a client with no API access can still run the whole
+pipeline. The contract is identical, so the rest of the system never knows which
+backend ran. Confidence and "unable to determine" carry the difference in
 reliability to the user.
 
 ### 3. Uncertainty Is a First-Class Output
@@ -94,7 +94,8 @@ backend/app/
     schema.py            SitePlan, Field, BBox (the shared contract)
     render.py            rasterize, text layer, positioned words
     base.py              Extractor protocol + factory with fallback
-    vision_extractor.py  Claude vision backend
+    openai_extractor.py  OpenAI vision backend
+    common.py            shared field mapping + text cross-check
     local_extractor.py   offline text-layer backend
   measurement/engine.py  derive lot area + lot coverage, propagate confidence
   compliance/

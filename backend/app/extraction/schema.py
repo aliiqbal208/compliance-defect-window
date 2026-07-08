@@ -1,6 +1,6 @@
 """Canonical data shapes for extraction.
 
-Every extractor backend (Claude vision, local) returns the *same* SitePlan, so
+Every extractor backend (OpenAI vision, local) returns the *same* SitePlan, so
 nothing downstream knows or cares which backend ran. A value that cannot be read
 is represented explicitly: value=None with a note, never a guess.
 """
@@ -40,7 +40,7 @@ FIELD_UNITS = {
 
 
 class Source(str, Enum):
-    VISION = "vision"      # read by the Claude vision model
+    VISION = "vision"      # read by the vision model
     TEXT = "text"          # read from the embedded PDF text layer
     DERIVED = "derived"    # computed by the measurement engine
 
@@ -72,7 +72,7 @@ class Field(BaseModel):
 class SitePlan(BaseModel):
     """Everything extracted from one site-plan PDF."""
     fields: Dict[str, Field] = PydField(default_factory=dict)
-    backend: str = ""                # "claude" | "local"
+    backend: str = ""                # "openai" | "local"
     source_pdf: str = ""
     page_count: int = 1
     page_width_pt: float = 0.0

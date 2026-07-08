@@ -47,7 +47,7 @@ Explain the design point reviewers care about:
 
 - Confidence per value, "Unable to determine" instead of guessing
 - FAIL vs UNKNOWN are distinct states
-- Two extractor backends behind one interface: Claude vision and a fully offline
+- Two extractor backends behind one interface: OpenAI vision and a fully offline
   local backend, with automatic fallback
 
 ## 4:30 - Architecture (30s)
